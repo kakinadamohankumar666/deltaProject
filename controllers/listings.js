@@ -1,7 +1,7 @@
 const Listing = require("../models/listing");
-const mbxGeocoding = require('@mapbox/mapbox-sdk/services/geocoding');
-const mapToken = process.env.Map_Token;
-const geocodingClient = mbxGeocoding({accessToken: mapToken});
+// const mbxGeocoding = require('@mapbox/mapbox-sdk/services/geocoding');
+// const mapToken = process.env.Map_Token;
+// const geocodingClient = mbxGeocoding({accessToken: mapToken});
 
 
 module.exports.index = async (req,res)=>{
@@ -31,23 +31,39 @@ module.exports.showListing = async (req,res) =>{
     res.render("listings/show.ejs",{listing});
 };
 
-module.exports.createListing = async(req,res,next)=>{
-    let response = await geocodingClient
-    .forwardGeocode({
-        query:req.body.listing.location,
-        limit: 1,
-    })
-    .send();
+// module.exports.createListing = async(req,res,next)=>{
+//     let response = await geocodingClient
+//     .forwardGeocode({
+//         query:req.body.listing.location,
+//         limit: 1,
+//     })
+//     .send();
 
-    const newListing = new Listing (req.body.listing);
-    newListing.owner = req.user._id; 
-    newListing.image = req.file.path;
-    newListing.geometry = response.body.features[0].geometry;
+//     const newListing = new Listing (req.body.listing);
+//     newListing.owner = req.user._id; 
+//     newListing.image = req.file.path;
+//     newListing.geometry = response.body.features[0].geometry;
+//     let savedListing = await newListing.save();
+//     console.log(savedListing);
+//     req.flash("success","New Listing Created");
+//     res.redirect("/listings");
+// };
+
+module.exports.createListing = async (req, res, next) => {
+    const newListing = new Listing(req.body.listing);
+    newListing.owner = req.user._id;
+
+    if (req.file) {
+        newListing.image = req.file.path;
+    }
+
     let savedListing = await newListing.save();
     console.log(savedListing);
-    req.flash("success","New Listing Created");
+
+    req.flash("success", "New Listing Created");
     res.redirect("/listings");
 };
+
 
 module.exports.renderEditForm = async (req,res)=>{
     let {id} = req.params;
